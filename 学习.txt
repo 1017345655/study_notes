@@ -1,0 +1,713 @@
+/*#include<stdio.h>
+#include<malloc.h>
+int main()
+{
+	char a[]="china";
+	return 0;
+}
+struct list
+{
+	int a;
+	list *next;
+};
+int len()
+{
+	int i;
+	i = sizeof(list);
+	return i;
+}
+list *head()
+{
+	list *p;
+	p = (list*)malloc(len());
+	p->a = 0;
+	p->next = NULL;
+	return p;
+}
+list*rearinser(list *p,list*q)
+{
+	list *a;
+	a = p;
+	while (a->next != NULL)
+		a = a->next;
+	a->next = q;
+	return p;
+}
+void printlist(list*p)
+{
+	list *q;
+	q = p;
+	while (q!=NULL)
+	{
+		printf("%d", q->a);
+		q = q->next;
+	}
+}
+int listunm(list*p)
+{
+	int t;
+	list *q;
+	q = p;
+	while (q != NULL)
+	{
+		t++;
+		q = q->next;
+	}
+	return t;
+}
+void deletenode(list*p, int n)
+{
+	int i;
+	list *q,*h;
+	q = p;
+	h = p->next;
+	for (i = 0; i < n-1; i++)
+	{
+		q = q->next;
+		h = h->next;
+	}
+	q->next = h->next;
+	free(h);
+}
+struct complex
+{
+	double real;
+	double image;
+};
+complex add(complex a, complex b)
+{
+	complex sum;
+	sum.image = a.image + b.image;
+	sum.real = a.real + b.real;
+	return sum;
+}
+char *copy(char*a, char*b)
+{
+	char*p, *q;
+	p = a; q = b;
+	while (q != '\0')
+	{
+		p = q;
+		p++;
+		q++;
+	}
+	return a;
+}
+int *selection_sort(int*q,int a)
+{
+	int i,j;
+	int t,k;
+	int*p,*h;
+	for (i = 0; i < a; i++)
+	{
+		p = q + i;
+		t = *p;
+		for (j = 0; j < a - i; j++)
+		{
+			if (t > *p)
+			{
+				t = *p;
+				h = p;
+			}
+			p++;
+		}
+		k = *h;
+		*h = *(q + i);
+		*(q + i) = k;
+	}
+	return q;
+}
+int *bubble(int *p, int a)
+{
+	int i,j;
+	int t;
+	int *q;
+	for (i = 0; i < a; i++)
+	{
+		q = p;
+		for (j = 0; j < a - i - 1; j++)
+		{
+			if (*q > *(q + 1))
+			{
+				t = *q;
+				*q = *(q + 1);
+				*(q + 1) = t;
+			}
+			q++;
+		}
+	}
+	return p;
+}
+double seek(double a[], double x, int y)
+{
+	int m, n;
+	int t = 1;
+	if (x > a[y - 1] || x < a[0])
+		t = -1;
+	else
+	{
+		n = y / 2;
+		m = y;
+		do
+		{
+			m = m / 2;
+			if (x > a[n] && x < a[n + 1])
+			{
+				t = -1;
+				break;
+			}
+			else
+			{
+				if (x > a[n])
+					n = n + m / 2;
+				if (x < a[n])
+					n = n - m / 2;
+			}
+		} while (x != a[n]);
+	}
+	if (t == -1)
+		return t;
+	else 
+		return n;
+}
+/*#include<stdio.h>
+#include<stdarg.h>
+#include<malloc.h>
+struct list//建立单链表
+{
+	int a;
+	list *next;
+};
+int len()//求结构体占用内存长度
+{
+	int l;
+	l = sizeof(list);
+	return l;
+}
+list *creatlist()//建立头部链表
+{
+	list *p;
+	p = (list*)malloc(len());//开辟一个长度为list类型的内存空间
+	p->a = 0;
+	p->next = NULL;
+	return p;
+}
+list *creatnode()//创建链表节点
+{
+	list *p;
+	p = (list*)malloc(len());
+	scanf_s("%d", &(p->a));
+	p->next = NULL;
+	return p;
+}
+void rearinsert(list *p, list *q)//向链表尾部插入节点
+{
+	list *a;
+	a = p;
+	while (a->next != NULL)
+		a = a->next;
+	a->next = q;
+}
+void printlist(list *h)//打印链表
+{
+	list *p;
+	p = h;
+	while (p!=NULL)
+	{
+		printf("%d", p->a);
+		p = p->next;
+	}
+}
+int listnum(list *h)//链表计数
+{
+	list *p;
+	int t=0;
+	p = h;
+	while (p != NULL)
+	{
+		t++;
+		p = p->next;
+	}
+	return t;
+}
+void deletenode(list *h, int n)//删除节点
+{
+	list *p,*q;
+	int i;
+	p = h;
+	q = h->next;
+	for (i = 0; i < n-1; i++)//n-1：将指针移到第n-2个节点处，头链表为第0个节点
+	{
+		p = p->next;
+		q = q->next;
+	}
+	p->next = q->next;//第n-2个节点的指针域存第n-1个节点的指针域的内容及第n个节点的地址
+	free(q);//释放动态内存
+}
+void insert(list *h, list *n, int m)//链表的插入
+{
+	int i;
+	list *p, *q;
+	p = h;
+	q = h->next;
+	for (i = 0; i < m - 1; i++)
+	{
+		p = p->next;
+		q = q->next;
+	}
+	n->next = q;
+	p->next = n;
+}
+struct complex//定义负数
+{
+	double real;
+	double image;
+};
+complex add(complex a, complex b)//负数求和
+{
+	complex sum;
+	sum.real = a.real + b.real;
+	sum.image = a.image + b.image;
+	return sum;
+}
+void create(complex *a)//负数输入
+{
+	double m, n;
+	scanf_s("%lf%lf", m, n);
+	a->real = m;
+	a->image = n;
+}
+void printc(complex a)//负数打印
+{
+	printf("%lf+%lfi", a.real, a.image);
+}
+double seek(double a[],double x ,int y)//折中查找（从小到大排列）
+{
+	int m, n;
+	int t = 0;
+	if (x < a[0] || x > a[y - 1])
+		return -1;
+	else
+	{
+		n = (y - 1) / 2;
+		m = y - 1;
+		do
+		{
+			m = m / 2 + 1;
+			if (x < a[n] && x > a[n - 1])
+			{
+				t = 1;
+				break;
+			}
+			else
+			{
+				if (x < a[n])
+					n = n - m / 2;
+				if (x > a[n])
+					n = n + m / 2;
+			}
+		} while (x != a[n]);
+		if (t == 1)
+			return -1;
+		else
+			return n;
+	}
+}
+void selection_sort(int a[], int n)//选择排序
+{
+	int i, j;
+	int t, s;
+	for (i = 0; i < n; i++)
+	{
+		s = i;
+		for (j = i; j < n; j++)
+			if (s > a[j])//找出最小的数
+				s = j;//记录这个数的位置
+		t = a[s];
+		a[s] = a[i];//此次循环最小的数放在循环开始的位置
+		a[i] = t;
+	}
+}
+void bubble_sort(int a[], int n)//冒泡排序
+{
+	int t;
+	int i, j;
+	for (i = 0; i < n; i++)
+	{
+		for (j = 0; j < n - 1 - i; j++)//n-1是防止超出数组长度
+		{
+			if (a[j] > a[j + 1])//通过相邻两个数做比较，将大的数后排直到此次循环结束
+			{
+				t = a[j];
+				a[j] = a[j + 1];
+				a[j + 1] = t;
+			}
+		}
+	}
+}
+void insertion_sort(int a[],int n)//插入排序
+{
+	int t, i, j;
+	for (i = 1; i < n; i++)//遍历数组
+	{
+		if (a[i] < a[i - 1])//相邻两数做比较
+		{
+			t = a[i];//将要调整的数取出
+			for (j = i - 1; j >= 0; j--)//从a[i]开始向前寻找比a[i]小的数
+			{
+				if (j == 0)//如果j=0时，a[0]比t大，则进行元素调换
+				{
+					a[j + 1] = a[j];
+					a[j] = t;
+				}
+				else if (a[j] > t)
+					a[j + 1] = a[j];//将比a[i]大的所有的数后移一位
+				else a[j + 1] = t;//将t插入到数组中的空缺位置处
+			}
+		}
+	}
+}
+char*copy(char*a, char*b)//字符串复制
+{
+	char*p, *q;
+	int lenge(char*a);
+	if (lenge(a) < lenge(b))
+	{
+		p = a;
+		q = b;
+		while (*q != '\0')
+		{
+			*p = *q;
+			p++;
+			q++;
+		}
+		*p = '\0';
+	}
+	return a;
+}
+int lenge(char*a)//求串长
+{
+	char *p;
+	int t = 0;
+	p = a;
+	while (*p != '\0')
+	{
+		p++;
+		t++;
+	}
+	return t;
+}
+char* link(char*a, char*b)//字符串连接
+{
+	char*copy(char*a, char*b);
+	int lenge(char*a);
+	int t;
+	char*p;
+	char*q;
+	t = lenge(a);
+	q = a + t;
+	p = copy(q, b);
+	return a;
+}
+int compare(char*a, char*b)//字符串比较
+{
+	int lenge(char*a);
+	char *p, *q;
+	int m, n, t = 0;
+	m = lenge(a);
+	n = lenge(b);
+	p = a;
+	q = b;
+	while (*p!='\0'&&*q!='\0')
+	{
+		if (*q > *p)
+		{
+			t = 1; break;
+		}
+		if (*q < *p)
+		{
+			t = -1; break;
+		}
+		p++;
+		q++;
+	}
+	if (t == 0)
+	{
+		if (m > n)
+			t = 1;
+		if (m < n)
+			t = -1;
+	}
+	return t;
+}
+double ave_row(double a[][5],int t)//数组行平均数(5*5数组）
+{
+	double ave = 0;
+	int i;
+	double (*p)[5];
+	for (i = 0; i < 10; i++)
+	{
+		p = a;
+		ave = ave + *(*(p + t) + i);
+	}
+	ave = ave / 5;
+	return ave;
+}
+double ave_column(double a[][5],int t)//数组列平均数(5*5数组）
+{
+	double ave = 0;
+	int i;
+	double(*p)[5];
+	for (i = 0; i < 5; i++)
+	{
+		p = a;
+		ave = ave + *(*(p + i) + t);
+	}
+	ave = ave / 5;
+	return ave;
+}
+double max(double a[][5],int m,int n)//数组最大值
+{
+	double max=0;
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			if (a[i][j] > max)
+			{
+				max = a[i][j];
+			}
+		}
+	}
+	return max;
+}
+double var(double b[],int n)//数组方差
+{
+	double var = 0, var1 = 0;
+	int i;
+	double *p;
+	for (i = 0; i < n; i++)
+	{
+		p = b;
+		var = var + *(p+i);
+		var1 = var1 + (*(p + i))*(*(p + i));
+	}
+	var = var1 / n - (var / n)*(var / n);
+	return var;
+}
+double lp(int x,int n)//勒让德多项式
+{
+	double s;
+	if (n == 0)
+		s = 1;
+	if (n == 1)
+		s = x;
+	if (n > 1)
+		s = ((2 * n - 1)*x - lp(x, n - 1) - (n - 1)*lp(x, n - 2)) / n;
+	return s;
+}
+double Taylor_series(double a1,double a2, ...)//泰勒级数求非线性方程的近似解
+{
+	va_list p;
+	int i;
+	double power(double, int);
+	double abs(double);
+	double x=100,y;
+	double f , n;
+	do
+	{
+		n = a2; i = 1; f = a1;
+		va_start(p, a2);
+		while (n > -10000&&n<10000)
+		{
+			f = f + n * power(x, i);
+			n = va_arg(p, int);
+			i++;
+		}
+		va_end(p);
+		n = a2; i = 0; y = 0;
+		va_start(p, a2);
+		while (n > -10000&&n<10000)
+		{
+			y = y + n * (i + 1)* power(x, i);
+			n = va_arg(p, int);
+			i++;
+		}
+		va_end(p);
+		x = x - f / y;
+	} while (abs(f) > 0.001);
+	return x;
+}
+void trp(int a[][3])//行列式的转置
+{
+	int i, j;
+	int t;
+	for (i = 0; i < 3; i++)
+	{
+		for (j = 0; j < i; j++)
+		{
+			t = a[i][j];
+			a[i][j] = a[j][i];
+			a[j][i] = t;
+		}
+	}
+}
+int mer(int x)//素数判断
+{
+	int i, t = 0;
+	double sqrt(double);
+	double s = 1;
+	for (i = 2; i < sqrt(x); i++)
+	{
+		s = x % i;
+		if (s == 0)
+			t++;
+	}
+	if (t == 0)
+		return 0;
+	else return -1;
+}
+int gcd(int x,int y)//最大公约数
+{
+	int i;
+	int s=1;
+	for (i = 2; i <= x; i++)
+	{
+		if (x%i == 0 && y%i == 0)
+			s = i;
+	}
+	return s;
+}
+int lcm(int x, int y)//最小公倍数
+{
+	int m = x, n = y;
+	int i = 1, j = 1;
+	do
+	{
+		if (m > n)
+		{
+			i += 1;
+			n = y * i;
+		}
+		if (m < n)
+		{
+			j += 1;
+			m = x * j;
+		}
+	} while (m!=n);
+	return m;
+}
+double e(int x)//自然底数e
+{
+	double n;
+	double fac(int);
+	if (x == 0)
+		n = 1;
+	else
+		n = 1 / fac(x) + e(x - 1);
+	return n;
+}
+double fac(int x)//阶乘
+{
+	int n = 0;
+	if (x == 1)
+		n = 1;
+	else
+		n = x * fac(x - 1);
+	return n;
+}
+double abs(double x)//绝对值
+{
+	if (x >= 0)
+		x = x;
+	else x = -x;
+	return x;
+}
+double power(double x, int y)//整数指数运算
+{
+	int j,z=1;
+	for (j = 1; j <= y; j++)
+		z = x * z;
+	return z;
+}
+double sqrt(double a)//开方运算
+{
+	double abs(double );
+	double x,y, z;
+	x = 1;
+	y = a;
+	do
+	{
+		x = (x + a / x) / 2;
+		z = abs(x - y);
+		y = x;
+	} while (z > 0.00001);
+	return x;
+}*/
+//#include<stdio.h>
+//#define N 5 
+/*int time(int n,int y, int d)//计算日期（开年多久）
+{
+	int s=0;
+	int i;
+	int a[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+	int b[12] = { 31,29,31,30,31,30,31,31,30,31,30,31 };
+	if ((n % 4 == 0&&n%100!=0)||n%400==0)
+	{
+		for (i = 0; i < y - 1; i++)
+			s += b[i];
+		s = s + d;
+	}
+	else
+	{
+		for (i = 0; i < y - 1; i++)
+			s += a[i];
+		s = s + d;
+	}
+	return s;
+}
+int main()
+{
+	int n, y, d;
+	scanf_s("%d%d%d", &n, &y, &d);
+	printf("%d", time(n, y, d));
+	return 0;
+}*/
+/*struct print
+{
+	int num;
+	char name;
+	int score[3];
+};
+void print_f(print *a)
+{
+	print*p;
+	p = a;
+	int i,j;
+	for (i = 0; i < N; i++)
+	{
+		printf("%5d", p->num);
+		printf("%5s", p->name);
+		for(j=0;j<3;j++)
+			printf("%5d", p->score[j]);
+		p++;
+	}
+}
+int main()
+{
+	print p[N];
+	int i, j;
+	print *q;
+	q = p;
+	for (i = 0; i < N; i++)
+	{
+
+		q->name = "top";
+		for(j=0;j<3;j++)
+			scanf_s("%d", q->score);
+		q++;
+	}
+	print_f(p);
+	return 0;
+}*/

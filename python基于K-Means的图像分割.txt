@@ -1,0 +1,226 @@
+import numpy as np
+import cv2
+import math as m
+from sklearn.cluster import KMeans
+
+#图像切割
+def img_cut(img,k):
+    img_1=[]
+    row=len(img[:,0,0])
+    col=len(img[0,:,0])
+    if k==1:
+        for i in range(row):
+            for j in range(col):
+                img_1.append([img[i,j,0] / 256.0, img[i,j,1] / 256.0, img[i,j,2] / 256.0])
+    elif k>1:
+        #用均值作为该区域内的像素
+        x=m.floor(row/k)-1
+        y=m.floor(col/k)-1
+        img=img/256.0
+        for i in range(x):
+            for j in range(y):
+                if j==y and i==x:
+                    a=np.mean(img[i+1:,j+1:,0])
+                    b=np.mean(img[i+1:,j+1:,1])
+                    c=np.mean(img[i+1:,j+1:,2])
+                    img_1.append([a,b,c])
+                elif j==y:
+                    a=np.mean(img[i:i+1:,j+1:,0])
+                    b=np.mean(img[i:i+1:,j+1:,1])
+                    c=np.mean(img[i:i+1:,j+1:,2])
+                    img_1.append([a,b,c])
+                elif i==x:
+                    a=np.mean(img[i+1:,j:j+1,0])
+                    b=np.mean(img[i+1:,j:j+1,1])
+                    c=np.mean(img[i+1:,j:j+1,2])
+                    img_1.append([a,b,c])
+                else:
+                    a=np.mean(img[i:i+1,j:j+1,0])
+                    b=np.mean(img[i:i+1,j:j+1,1])
+                    c=np.mean(img[i:i+1,j:j+1,2])
+                    img_1.append([a,b,c])
+    else:
+        img_1.append(0)
+        
+    return img_1,row,col
+
+#减法聚类
+def SCM(img_1):
+    #print(img_1)
+    n=len(img_1)
+    #print(n)
+    r_a=1
+    r_b=[]
+    p=[]
+    x=0
+    center=[]
+    center_1=[]
+    #计算每个像素点所对应的密度值
+    for i in range(n):
+        s=0
+        for j in range(n):
+            d=np.sum((img_1[i]-img_1[j])**2)
+            s=m.e**(-4*m.sqrt(d)/r_a**2)+s
+        #print(r_b[n*i+j])
+        p.append(s)
+    
+    p_max=np.max(p)
+    n_max=p.index(p_max)
+    center.append(img_1[n_max])
+    center_1.append(n_max)
+    x=x+1
+    r_a=0.5
+    #根据阈值获得聚类个数
+    p1_max=0
+    for i in range(n):
+        d=np.sum((img_1[i]-img_1[j])**2)
+        p[i]=p[i]-p_max*m.e**(-4*m.sqrt(d)/r_a**2)
+        #print(s,p_max*m.e**(-4*m.sqrt(s)/r_a**2),p[i],img_1[i])
+    p1_max=np.max(p)
+    n1_max=p.index(p1_max)
+    #print(p1_max/p_max)
+    k=m.floor(10*p1_max/p_max)/10-0.1
+    #print(round(p1_max/p_max,1))
+    while(p1_max/p_max>k):
+        center.append(img_1[n1_max])
+        center_1.append(n1_max)
+        x=x+1
+        for i in range(n):
+            d = np.sum((img_1[i]-img_1[j])**2)
+            #print(s)
+            p[i] = p[i]-p1_max*m.e**(-4*m.sqrt(d)/r_a**2)
+        p1_max=np.max(p)
+        n1_max=p.index(p1_max)
+        #print(p1_max/p_max)
+        #print(n_max,n1_max)
+    return x,center
+
+# 计算新的中心点
+def newcenter(data, k, pixls):
+    center = []
+    for i in range(k):
+        data1 = []
+        n = 0
+        # 将每一类的数据分离出来
+        for j in range(len(pixls)):
+            if i == pixls[j]:
+                data1.append(data[j])
+                n = n+1
+        data1 = np.array(data1)
+        # 计算每一类的样本均值
+        center1 = np.sum(data1, axis=0)/n
+        center1 = center1.tolist()
+        center.append(center1)
+    return center
+
+# 分类器
+def classifer(data, center, k):
+    imgData = np.array(data)
+    m = len(data)      
+    lei = []
+    for i in range(m):
+        dist = []
+        for j in range(k):
+            dist1 = np.sqrt(np.sum((imgData[i] - center[j]) ** 2))      
+            dist.append(dist1)
+        lei1 = dist.index(min(dist))        
+        lei.append(lei1)        
+    return lei
+
+# 计算损失函数
+def loss_function(present_center, pre_center):
+    present_center = np.array(present_center)
+    pre_center = np.array(pre_center)  
+    return np.sum((present_center - pre_center) ** 2)       # 损失函数，计算上一次与当前聚类中的差异（像素差的平方和）
+
+# 进行K-均值聚类
+def kmeans(data,present_center,k):
+    # 随机选取k个中心点
+    #present_center = centerdef(data, k)
+    num = 0     # 记录迭代次数
+    while True:
+        # 储存前一次的聚类中心
+        pre_center = present_center.copy()
+        # 利用分类器将样本分类
+        pixls = classifer(data, present_center, k)
+        # 计算每类样本均值并作为新的中心点
+        present_center = newcenter(data, k, pixls)
+        # 计算损失函数
+        loss = loss_function(present_center, pre_center)
+        num = num + 1
+        #print('step:'+str(num), 'loss:'+str(loss))
+        # 如果损失函数小于迭代阈值，跳出循环
+        if loss <= 0.000000001:
+            break
+    print(present_center)
+    return pixls
+
+# 计算离差点个数
+def lossnum(pixls, label):
+    num = 0
+    for i in range(len(pixls)):
+        if pixls[i] == label[i]:
+            num = num + 1
+    return num
+
+#图像上色
+def img_col(img_old,img,row,col):
+    for i in range(row):
+        for j in range(col):
+            if img[i,j]==0:
+                img_old[i,j,0]=255
+                img_old[i,j,1]=0
+                img_old[i,j,2]=0
+            elif img[i,j]==1:
+                img_old[i,j,0]=255
+                img_old[i,j,1]=255
+                img_old[i,j,2]=0
+            elif img[i,j]==2:
+                img_old[i,j,0]=255
+                img_old[i,j,1]=255
+                img_old[i,j,2]=255
+            elif img[i,j]==3:
+                img_old[i,j,0]=255
+                img_old[i,j,1]=0
+                img_old[i,j,2]=255
+            elif img[i,j]==4:
+                img_old[i,j,0]=0
+                img_old[i,j,1]=255
+                img_old[i,j,2]=255
+            else:
+                img_old[i,j,0]=0
+                img_old[i,j,1]=0
+                img_old[i,j,2]=0
+
+    #显示图片
+    img_old = cv2.cvtColor(img_old, cv2.COLOR_BGR2GRAY) #转化为灰度图
+    cv2.namedWindow('input_image', cv2.WINDOW_AUTOSIZE)
+    cv2.imshow('input_image',img_old)
+    cv2.waitKey(0)
+    cv2.destroyALLWindows()
+    
+# 计算离差点个数
+def lossnum(pixls, label,row,col):
+    num = 0
+    for i in range(row):
+        for j in range(col):
+            if pixls[i] == label[i]:
+                num = num + 1
+    print(num/(row*col))
+
+
+
+if __name__ == '__main__':
+    filepath='E:/1.png'
+    img = cv2.imread(filepath)
+    Data,row,col=img_cut(img,10)
+    Data=np.array(Data)
+    k,center=SCM(Data)
+    print(center)
+    Data,row,col=img_cut(img,1)
+    label = np.array(kmeans(Data,center,k))
+    pixls=np.array(KMeans(n_clusters=k).fit_predict(Data))#基于sklearn的K-Means聚类
+    lossnum(pixls,label,row,col)
+    #print(len(label))
+    label = label.reshape([row, col])
+    img_col(img,label,row,col)
