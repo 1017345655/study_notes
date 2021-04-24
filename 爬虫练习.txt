@@ -1,0 +1,190 @@
+#对视频进行爬取
+import requests
+from lxml import etree
+
+session=requests.session()
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+}
+url='https://www.pearvideo.com/category_5'
+html=session.get(url=url,headers=headers).text
+
+tree=etree.HTML(html)
+li_list=tree.xpath('//li[@class="categoryem "]')
+for li in li_list:
+    video_url='https://www.pearvideo.com/videoStatus.jsp?contId='+li.xpath('./div/div/span/@data-id')[0]
+    name=li.xpath('./div/a/div[2]/text()')[0]+'.mp4'
+    video_text=session.get(url=video_url,headers=headers).text
+    print(video_text)
+
+
+#所有城市信息
+
+import requests
+from lxml import etree
+import os
+
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+}
+
+url='https://www.aqistudy.cn/historydata/'
+page_text = requests.get(url=url,headers=headers)
+html=etree.HTML(page_text.text)
+hot_li_list=html.xpath('//ul[@class="unstyled"]//li')
+all_city=[]
+for li in hot_li_list:
+    city_name=li.xpath('./a/text()')[0]
+    all_city.append(city_name)
+#list(set())列表去重
+print(list(set(all_city)))
+
+
+#xpath爬取图片
+
+import requests
+from lxml import etree
+import os
+
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+}
+
+def get_pictures(url):
+    page_text = requests.get(url=url,headers=headers)
+
+    #手动设定响应数据的编码格式
+    page_text.encoding='utf-8'
+
+    html=etree.HTML(page_text.text)
+    #print(html)
+    li_list = html.xpath('//div[@class="slist"]/ul/li')
+
+    #创建一个文件夹
+    if not os.path.exists('./pic'):
+        os.mkdir('./pic')
+    
+    for li in li_list:
+        img_src='http://pic.netbian.com/'+li.xpath('./a/img/@src')[0]
+        img_name=li.xpath('.//img/@alt')[0]+'.jpg'
+        #通用处理中文乱码解决方案
+        #img_name=img_name.encode('iso-8859-1').decode('gbk')
+        print(img_name,img_src)
+        img_data=requests.get(url=img_src,headers=headers).content
+        img_path='pic/'+img_name
+        with open(img_path,'wb') as fp:
+            fp.write(img_data)
+            print(img_name,'下载成功')
+
+def main():
+    for i in range(10):
+        url='http://pic.netbian.com/4kmingxing/index_'+str(i)+'.html'
+        get_pictures(url)
+
+main()
+
+
+
+#爬取网易云
+
+import requests
+from lxml import etree
+
+
+#伪装浏览器访问网址
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362'
+}
+#目标网址
+url = 'https://music.163.com/#/discover/toplist?id=3778678'
+#音频存储地址
+base_url = 'https://music.163.com/song/media/outer/url?id='
+#get请求
+r = requests.get(url)
+#解析网址
+html= etree.HTML(r.text)
+#print(r.text)
+
+id_list = html.xpath('//a[contains(@href,"/song?")]')
+print(id_list)
+"""
+for data in id_list:
+    href = data.xpath('./@herf')[0]
+    music_id = href.split("=")[1]
+    music_name=data.xpath('./text()')[0]
+    music_url = base_url + music_id
+    
+    music = requests.get(music_url,headers=headers)
+    with open('E://%s.mp3'% music_name, 'wb') as file:
+        file.write(music.content)
+    print('<%s>下载完毕'%music_name)
+"""
+
+
+#评论爬取
+import requests
+from lxml import etree
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+}
+
+url='https://movie.douban.com/chart'
+page_text = requests.get(url=url,headers=headers)
+#print(page_text.text)
+html=etree.HTML(page_text.text)
+hot_div_list=html.xpath('//div[@class="indent"]//table')
+view_names=[]
+view_urls=[]
+for div in hot_div_list:
+    view_url=div.xpath('.//a[@class="nbg"]/@href')[0]
+    view_urls.append(view_url+'reviews')
+    view_name=div.xpath('.//a[@class="nbg"]/@title')[0]
+    view_names.append(view_name)
+#print(view_urls)
+fp=open('./评论.txt','w',encoding='utf-8')
+s=0
+for u in view_urls:
+    page_text=requests.get(url=u,headers=headers)
+    html=etree.HTML(page_text.text)
+    hot_div_list=html.xpath('//div[@class="review-list  "]/div')
+    #print(hot_div_list)
+    fp.write(view_names[s]+'\n')
+    s=s+1
+    for div in hot_div_list[0:10]:
+        name=div.xpath('.//a[@class="name"]/text()')[0]
+        tit=div.xpath('.//div[@class="main-bd"]//a/text()')[0]
+        try:
+            score=div.xpath('.//header[@class="main-hd"]/span[1]/@title')[0]
+        except:
+            score="无评分"
+        fp.write(name+':'+score+'\n'+tit+'\n')
+        #print(score)
+    print(view_names[s-1]+"爬取完成")
+
+
+#爬取三国演义的标题
+
+
+import requests
+from bs4 import BeautifulSoup
+
+headers={
+    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362'
+}
+url='https://www.shicimingju.com/book/sanguoyanyi.html'
+page_text=requests.get(url,headers=headers)
+page_text=page_text.text
+soup=BeautifulSoup(page_text,'lxml')
+
+#soup.select选择相应标签
+li_list=soup.select('.book-mulu > ul > li')
+fp=open('./sanguo.txt','w',encoding='utf-8')
+for li in li_list:
+    title=li.a.string
+    detial_url='https://www.shicimingju.com'+li.a['href']
+    detial_name_text=requests.get(url=detial_url,headers=headers).text
+    detial_soup=BeautifulSoup(detial_name_text,'lxml')
+    div_tag=detial_soup.find('div',class_='chapter_content')
+    content=div_tag.text
+    fp.write(title+':'+content+'\n')
+    print(title,'下载成功')
