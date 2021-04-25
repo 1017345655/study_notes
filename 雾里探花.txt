@@ -1,0 +1,54 @@
+clear
+RGB = imread('F:\ChenWang\MatlabClub\4.jpg'); 
+figure
+imshow(RGB);
+title('²ÊÉ«Í¼');
+[R, C, K] = size(RGB); 
+cnt = zeros(K, 256);
+for i = 1 : R
+    for j = 1 : C
+        for k = 1 : K
+            cnt(k, RGB(i, j, k) + 1) = cnt(k, RGB(i, j, k) + 1) + 1;
+        end
+    end
+end
+f = zeros(3, 256);
+f = double(f); cnt = double(cnt);
+for k = 1 : K
+    for i = 1 : 256
+        f(k, i) = cnt(k, i) / (R * C);
+    end
+end
+for k = 1 : K
+    for i = 2 : 256
+        f(k, i) = f(k, i - 1) + f(k, i);
+    end
+end
+for k = 1 : K
+    for i = 1 : 256
+        f(k, i) = f(k, i) * 255;
+    end
+end
+for i = 1 : R
+    for j = 1 : C
+        for k = 1 : K
+            RGB(i, j, k) = f(k, RGB(i, j, k) + 1);
+        end
+    end
+end
+RGB = uint8(RGB);
+
+[M,N]=size(RGB);
+for i=1:M
+    for j=1:N
+        if RGB(i,j)<=30
+            RGB(i,j)=RGB(i,j);
+        elseif RGB(i,j)<=150
+            RGB(i,j)=(200-30)/(150-30)*(RGB(i,j)-30)+30;
+        else
+            RGB(i,j)=(255-200)/(255-150)*(RGB(i,j)-150)+200;
+        end
+    end
+end
+figure
+imshow(uint8(RGB));
