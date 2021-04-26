@@ -1,0 +1,929 @@
+#include<stdio.h>
+#include<malloc.h>
+#include<time.h>
+#include<stdlib.h>
+#include<Windows.h>
+#include <algorithm>
+using namespace std;
+#define pi 3.1415926
+double **zeros(int m, int n)//生成全零矩阵
+{
+	double **p;
+	p = (double**)malloc(sizeof(double)*m);
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		*(p + i) = (double*)malloc(sizeof(double)*n);
+	}
+	for (i = 0; i < m; i++)
+		for (j = 0; j < n; j++)
+			*(*(p + i) + j) = 0;
+	return p;
+}
+
+double **ones(int m, int n)//生成全1矩阵
+{
+	double **p;
+	p = (double**)malloc(sizeof(double)*m);
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		*(p + i) = (double*)malloc(sizeof(double)*n);
+	}
+	for (i = 0; i < m; i++)
+		for (j = 0; j < n; j++)
+			*(*(p + i) + j) = 1;
+	return p;
+}
+
+double **rand_1(int m, int n)//生成0-1分布矩阵
+{
+	double **p;
+	p = (double**)malloc(sizeof(double)*m);
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		*(p + i) = (double*)malloc(sizeof(double)*n);
+	}
+	for (i = 0; i < m; i++)
+		for (j = 0; j < n; j++)
+		{
+			srand(GetTickCount());
+			*(*(p + i) + j) = rand() % 2;
+			Sleep(29);
+		}
+	return p;
+}
+
+double **input_self(int m, int n)//自己输入
+{
+	int i, j;
+	double **p;
+	double **zeros(int, int);
+	p = zeros(m, n);
+	for (i = 0; i < m; i++)
+		for (j = 0; j < n; j++)
+			scanf_s("%lf", &p[i][j]);
+	return p;
+}
+
+double **rand_u(int m, int n)//生成均匀分布矩阵
+{
+	double **p;
+	p = (double**)malloc(sizeof(double)*m);
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		*(p + i) = (double*)malloc(sizeof(double)*n);
+	}
+	for (i = 0; i < m; i++)
+		for (j = 0; j < n; j++)
+		{
+			srand(GetTickCount());
+			*(*(p + i) + j) = rand() / 32768.0;
+			Sleep(29);
+		}
+	return p;
+}
+
+double matrix_max(double **p, int m, int n)//数组最大值
+{
+	double max = -1;
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			if (p[i][j] > max)
+			{
+				max = p[i][j];
+			}
+		}
+	}
+	return max;
+}
+
+double matrix_min(double **p, int m, int n)//数组最小值
+{
+	double min = 10;
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			if (p[i][j] < min)
+			{
+				min = p[i][j];
+			}
+		}
+	}
+	return min;
+}
+
+double matrix_ave(double **p, int m, int n)//数组列平均数
+{
+	double ave = 0;
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+			ave = ave + p[i][j];
+	}
+	ave = ave / (m * n);
+	return ave;
+}
+
+double** matrix_add(double **a, int m1, int n1, double **b, int m2, int n2)
+{
+	double **zeros(int, int);
+	double **c;
+	int i, j;
+	c = zeros(m1, n1);
+	for (i = 0; i < m1; i++)
+		for (j = 0; j < n1; j++)
+			c[i][j] = a[i][j] + b[i][j];
+	return c;
+}
+
+double** matrix_sub(double **a, int m1, int n1, double **b, int m2, int n2)
+{
+	double **zeros(int, int);
+	double **c;
+	int i, j;
+	c = zeros(m1, n1);
+	for (i = 0; i < m1; i++)
+		for (j = 0; j < n1; j++)
+			c[i][j] = a[i][j] - b[i][j];
+	return c;
+}
+
+double** matrix_mult(double **a, int m1, int n1, double **b, int m2, int n2)
+{
+	int min1(int, int);
+	int max1(int, int);
+	double **zeros(int, int);
+	double **c;
+	int i, j, k, min, max;
+	double t, p;
+	max = max1(m1, n1);
+	min = min1(m1, n1);
+	c = zeros(min, min);
+	for (i = 0; i < min; i++)
+	{
+		for (j = 0; j < min; j++)
+		{
+			t = 0;
+			for (k = 0; k < max; k++)
+			{
+				p = a[i][k] * b[k][j];
+				t = t + p;
+			}
+			c[i][j] = t;
+		}
+	}
+	return c;
+}
+
+double**matrix_number(double **a, int m, int n, double s)
+{
+	double **zeros(int m, int n);
+	double **c;
+	c = zeros(m, n);
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+			c[i][j] = s * a[i][j];
+	}
+	return c;
+}
+
+double Determinant(double **a, int m1, int n1)//计算行列式
+{
+	int i, j, k;
+	int p[100];
+	double s = 0;
+	double d;
+	for (int k = 0; k < m1; k++)
+		p[k] = k;
+	do
+	{
+
+		int k = 0;
+		for (i = m1 - 1; i > 0; i--)
+		{
+			for (j = i - 1; j >= 0; j--)
+			{
+				if (p[j] > p[i])
+					k++;
+			}
+		}
+		d = 1;
+		for (i = 0; i < m1; i++)
+			d = a[i][p[i]] * d;
+		if (k % 2)
+			d = -d;
+		s = d + s;
+	} while (next_permutation(p, p + m1));//next_permutation(数组头地址，数组尾地址);
+	//若下一个排列存在，则返回真，如果不存在则返回假
+	return s;
+}
+
+double** adjoint(double**a, int m, int n)//伴随矩阵
+{
+	double power(double, int);
+	double **zeros(int, int);
+	double Determinant(double **, int, int);
+	double **c, **b;
+	c = zeros(m - 1, n - 1);
+	b = zeros(m, n);
+	int i, j, k, v;
+	double d;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			for (k = 0; k < i; k++)
+			{
+				for (v = 0; v < j; v++)
+				{
+					c[k][v] = a[k][v];
+				}
+				for (v = j + 1; v < n; v++)
+				{
+					c[k][v - 1] = a[k][v];
+				}
+			}
+			for (k = i + 1; k < m; k++)
+			{
+				for (v = 0; v < j; v++)
+				{
+					c[k - 1][v] = a[k][v];
+				}
+				for (v = j + 1; v < n; v++)
+				{
+					c[k - 1][v - 1] = a[k][v];
+				}
+			}
+			d = Determinant(c, m - 1, n - 1);
+			b[j][i] = power(-1, i + j)*d;
+		}
+	}
+	return b;
+}
+
+double** Inverse_matrix(double**a, int m, int n)//逆矩阵
+{
+	double Determinant(double **, int, int);
+	double**matrix_number(double **, int, int, double);
+	double**zeros(int, int);
+	double **c, **b;
+	double d;
+	b = zeros(m, n);
+	c = zeros(m, n);
+	b = adjoint(a, m, n);
+	d = Determinant(a, m, n);
+	if (d != 0)
+		c = matrix_number(b, m, n, 1 / d);
+	return c;
+}
+
+void printf_matrix(double**p, int m, int n)//打印矩阵
+{
+	int i, j;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < n; j++)
+			printf("%10.2lf ", *(*(p + i) + j));
+		printf("\n");
+	}
+}
+
+double **trp(double**a, int m, int n)//行列式的转置
+{
+	int i, j;
+	double t;
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < i; j++)
+		{
+			t = *(*(a + i) + j);
+			*(*(a + i) + j) = *(*(a + j) + i);
+			*(*(a + j) + i) = t;
+		}
+	}
+	return a;
+}
+
+double**splicing_h(double**a, double**b, int a_1, int a_2, int b_1, int b_2)//矩阵拼接(左右拼接）
+{
+	int i, j;
+	int max1(int, int);
+	int min1(int, int);
+	double **p;
+	int m, n, t;
+	m = max1(a_1, b_1);
+	n = min1(a_1, b_1);
+	if (n == a_1)
+		t = -1;
+	else t = 1;
+	p = zeros(m, a_2 + b_2);
+	for (i = 0; i < m; i++)
+	{
+		for (j = 0; j < a_2 + b_2; j++)
+		{
+			if (t == 1)
+			{
+				if (j < a_2)
+					*(*(p + i) + j) = *(*(a + i) + j);
+				if (j >= a_2 && i < n)
+					*(*(p + i) + j) = *(*(b + i) + j - a_2);
+			}
+			if (t == -1)
+			{
+				if (j < a_2&&i < n)
+					*(*(p + i) + j) = *(*(a + i) + j);
+				if (j >= a_2)
+					*(*(p + i) + j) = *(*(b + i) + j - a_2);
+			}
+		}
+	}
+	return p;
+}
+
+double**splicing_l(double**a, double**b, int a_1, int a_2, int b_1, int b_2)//矩阵拼接(上下拼接）
+{
+	int i, j;
+	int max1(int, int);
+	int min1(int, int);
+	double **p;
+	int m, n, t;
+	m = max1(a_2, b_2);
+	n = min1(a_2, b_2);
+	if (n == a_2)
+		t = 1;
+	else t = -1;
+	p = zeros(a_1 + b_1, m);
+	for (i = 0; i < (a_1 + b_1); i++)
+	{
+		for (j = 0; j < m; j++)
+		{
+			if (t == 1)
+			{
+				if (i < a_1&&j < n)
+					*(*(p + i) + j) = *(*(a + i) + j);
+				if (i >= a_1)
+					*(*(p + i) + j) = *(*(b + i - a_1) + j);
+			}
+			if (t == -1)
+			{
+				if (i >= a_1 && j < n)
+					*(*(p + i) + j) = *(*(b + i - a_1) + j);
+				if (i < a_1)
+					*(*(p + i) + j) = *(*(a + i) + j);
+			}
+		}
+	}
+	return p;
+}
+
+double power(double x, int y)//整数指数运算
+{
+	int j;
+	double z = 1;
+	if (y == 0)
+		z = z;
+	else
+		for (j = 1; j <= y; j++)
+			z = x * z;
+	return z;
+}
+
+double fac(int x)//阶乘
+{
+	double n = 0;
+	if (x == 1 || x == 0)
+		n = 1;
+	else
+		n = x * fac(x - 1);
+	return n;
+}
+
+double abs_s(double x)
+{
+	double t;
+	if (x >= 0)
+		t = x;
+	else t = -x;
+	return t;
+}
+
+double sqrt_s(double a)//开方运算
+{
+	double abs_s(double);
+	double x, y, z;
+	x = 1;
+	y = a;
+	do
+	{
+		x = (x + a / x) / 2;
+		z = abs_s(x - y);
+		y = x;
+	} while (z > 0.00001);
+	return x;
+}
+
+double add(double x)
+{
+	double z;
+	int i;
+	z = 0;
+	for (i = 1; i <= x; i++)
+	{
+		z = z + i;
+	}
+	if (x < 0)
+	{
+		z = 0;
+	}
+	return z;
+}
+
+int max1(int a, int b)
+{
+	int t = 0;
+	if (a > b)
+		t = a;
+	else
+		t = b;
+	return t;
+}
+
+int min1(int a, int b)
+{
+	int t = 0;
+	if (a < b)
+		t = a;
+	else
+		t = b;
+	return t;
+}
+
+void printf_star()
+{
+	printf("*");
+}
+
+void welcome()
+{
+	void printf_star();
+	int i, j, k;
+	for (i = 0; i < 25; i++)
+	{
+		if (i == 7)
+		{
+			printf_star();
+			for (k = 0; k < 9; k++)
+				printf(" ");
+			printf("Welcome to Matrix Calculator");
+			for (k = 0; k < 11; k++)
+				printf(" ");
+			printf_star();
+		}
+		if (i == 20)
+		{
+			printf_star();
+			for (k = 0; k < 17; k++)
+				printf(" ");
+			printf("Version 2019a");
+			for (k = 0; k < 18; k++)
+				printf(" ");
+			printf_star();
+		}
+		for (j = 0; j < 50; j++)
+		{
+			if (i == 7)
+				;
+			else if (i == 20)
+				;
+			else if (i == 0)
+				printf_star();
+			else if (j == 0)
+				printf_star();
+			else if (j == 49)
+				printf_star();
+			else if (i == 24)
+				printf_star();
+			else
+				printf(" ");
+		}
+		printf("\n");
+	}
+	printf("press any key to continue...");
+	getchar();
+	system("cls");
+}
+
+double**window_1(int m, int n, double**q)
+{
+	double **zeros(int, int);//生成全零矩阵
+	double **rand_u(int, int);//Uniform distribution分布矩阵
+	double **rand_1(int, int);//0-1分布
+	double **ones(int, int);//生成全1矩阵
+	double **input_self(int, int);//矩阵输入
+	//double **rand_N(int, int);
+	int b;
+	double**p = 0;
+	printf("please make a choose:\n");
+	printf("1.Matrix input\n");
+	printf("2.Generate all zero matrix\n");
+	printf("3.Generate all one matrix\n");
+	printf("4.Use the original calculation results");
+	printf("(Default to 1 row, 1 column, all ones matrix)\n");
+	printf("5.Generating a matrix of Uniform distribution\n");
+	printf("6.Generating a matrix of 0-1 distribution\n");
+	scanf_s("%d", &b);
+	system("cls");
+	if (b == 1)
+		p = input_self(m, n);
+	else if (b == 2)
+		p = zeros(m, n);
+	else if (b == 3)
+		p = ones(m, n);
+	else if (b == 4)
+		p = q;
+	else if (b == 5)
+		p = rand_u(m, n);
+	else if (b == 6)
+		p = rand_1(m, n);
+	else
+		p = zeros(m, n);
+	return p;
+}
+
+void window_2()
+{
+	double **trp(double**, int, int);//行列转置
+	double**matrix_number(double**, int, int, double);//矩阵数乘
+	double** matrix_add(double**, int, int, double**, int, int);//矩阵加法
+	double** matrix_sub(double**, int, int, double**, int, int);//矩阵减法
+	double** matrix_mult(double**, int, int, double**, int, int);//矩阵乘法
+	double**splicing_h(double**, double**, int, int, int, int);//矩阵拼接（左右拼接）
+	double**splicing_l(double**, double**, int, int, int, int);//矩阵拼接（上下拼接）
+	void printf_matrix(double**, int, int);//矩阵输出
+	double matrix_max(double **, int, int);
+	double**window_1(int, int, double**);
+	double **ones(int, int);
+	int min1(int a, int b);
+	int c = 1;
+	int d;
+	int b;
+	double t;
+	int m1, n1, m2, n2;
+	int *p1;
+	p1 = &c;
+	double **p, **q, **s;
+	s = ones(1, 1);
+	do
+	{
+		printf("please make a choose:\n");
+		printf("\n");
+		printf("1.Matrix addition\n");
+		printf("2.Matrix subtraction\n");
+		printf("3.Matrix multiplication\n");
+		printf("4.The number multiplication of matrix\n");
+		printf("5.Matrix splicing(up and down)\n");
+		printf("6.Matrix splicing(right and left)\n");
+		printf("7.Transpose of matrix\n");
+		printf("8.Inverse of matrix\n");
+		printf("9.Calculate the value of determinant\n");
+		printf("10.Calculating adjoint matrix\n");
+		printf("11.Calculate matrix maximum\n");
+		printf("12.Calculate matrix minimum\n");
+		printf("13.Calculate matrix average\n");
+		scanf_s("%d", &b);
+		system("cls");
+		if (b == 1)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m2);
+			printf("width=");
+			scanf_s("%d", &n2);
+			q = window_1(m2, n2, s);
+			system("cls");
+			if (m1 == n1 && m2 == n2)
+			{
+				printf("A =\n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("B =\n");
+				printf_matrix(q, m2, n2);
+				printf("----------------------------------------------------\n");
+				s = matrix_add(p, m1, n1, q, m2, n2);
+				printf("A + B =\n");
+				printf_matrix(s, m1, n1);
+			}
+			else printf("error!\n");
+		}
+		if (b == 2)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m2);
+			printf("width=");
+			scanf_s("%d", &n2);
+			q = window_1(m2, n2, s);
+			system("cls");
+			if (m1 == n1 && m2 == n2)
+			{
+				printf("A = \n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("B = \n");
+				printf_matrix(q, m2, n2);
+				printf("----------------------------------------------------\n");
+				printf("A - B = \n");
+				s = matrix_sub(p, m1, n1, q, m2, n2);
+				printf_matrix(s, m1, n1);
+			}
+			else printf("error!\n");
+		}
+		if (b == 3)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m2);
+			printf("width=");
+			scanf_s("%d", &n2);
+			q = window_1(m2, n2, s);
+			system("cls");
+			if (n1 == m2 && n2 == m1)
+			{
+				printf("A = \n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("B = \n");
+				printf_matrix(q, m2, n2);
+				printf("----------------------------------------------------\n");
+				printf("A * B = \n");
+				d = min1(m1, n1);
+				s = matrix_mult(p, m1, n1, q, m2, n2);
+				printf_matrix(s, d, d);
+			}
+			else printf("error!\n");
+		}
+		if (b == 4)
+		{
+			printf("Please enter the size of matrix A:");
+			printf("\n");
+			printf("lenge =");
+			scanf_s("%d", &m1);
+			printf("width =");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			printf("X =\n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("please enter a number:\n");
+			printf("A = ");
+			scanf_s("%lf", &t);
+			printf("----------------------------------------------------\n");
+			s = matrix_number(p, m1, n1, t);
+			printf("A X =\n");
+			printf_matrix(s, m1, n1);
+		}
+		if (b == 5)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m2);
+			printf("width=");
+			scanf_s("%d", &n2);
+			q = window_1(m2, n2, s);
+			system("cls");
+			s = splicing_l(p, q, m1, n1, m2, n2);
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("B = \n");
+			printf_matrix(q, m2, n2);
+			printf("----------------------------------------------------\n");
+			printf("Putting it all together results\n");
+			printf_matrix(s, m1 + m2, max1(n1, n2));
+		}
+		if (b == 6)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m2);
+			printf("width=");
+			scanf_s("%d", &n2);
+			q = window_1(m2, n2, s);
+			s = splicing_h(p, q, m1, n1, m2, n2);
+			system("cls");
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("B = \n");
+			printf_matrix(q, m2, n2);
+			printf("----------------------------------------------------\n");
+			printf("Putting it all together results\n");
+			printf_matrix(s, max1(m1, m2), n1 + n2);
+		}
+		if (b == 7)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			if (m1 == n1)
+			{
+				p = window_1(m1, n1, s);
+				system("cls");
+				printf("A = \n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("A` = \n");
+				s = trp(p, m1, n1);
+				printf_matrix(s, m1, n1);
+			}
+			else
+				printf("error!\n");
+		}
+		if (b == 8)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			if (m1 == n1)
+			{
+				p = window_1(m1, n1, s);
+				system("cls");
+				s = Inverse_matrix(p, m1, n1);
+				printf("A = \n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("A^-1 = \n");
+				printf_matrix(s, m1, n1);
+			}
+			else printf("error!\n");
+		}
+		if (b == 9)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			if (m1 == n1)
+			{
+				t = Determinant(p, m1, n1);
+				system("cls");
+				printf("A = \n");
+				printf_matrix(p, m1, n1);
+				printf("----------------------------------------------------\n");
+				printf("| A | = ");
+				printf("%lf\n", t);
+			}
+			else printf("error!\n");
+		}
+		if (b == 10)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			s = adjoint(p, m1, n1);
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("A* = \n");
+			printf_matrix(s, m1, n1);
+		}
+		if (b == 11)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			t = matrix_max(p, m1, n1);
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("max (A) = ");
+			printf("%.2lf\n", t);
+		}
+		if (b == 12)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			t = matrix_min(p, m1, n1);
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("min (A) = ");
+			printf("%.2lf\n", t);
+		}
+		if (b == 13)
+		{
+			printf("Please enter the size of the matrix:");
+			printf("\n");
+			printf("lenge=");
+			scanf_s("%d", &m1);
+			printf("width=");
+			scanf_s("%d", &n1);
+			p = window_1(m1, n1, s);
+			system("cls");
+			t = matrix_ave(p, m1, n1);
+			printf("A = \n");
+			printf_matrix(p, m1, n1);
+			printf("----------------------------------------------------\n");
+			printf("ave (A) = ");
+			printf("%.2lf\n", t);
+		}
+		printf("----------------------------------------------------\n");
+		printf("Press 1 to continue\t");
+		printf("Press 0 to close the program\n");
+		scanf_s("%d", &c);
+		p1 = &c;
+		system("cls");
+	} while (*p1 != 0);
+}
+
+int main()
+{
+	void welcome();
+	void window_2();
+	welcome();
+	window_2();
+	return 0;
+}
+
+
